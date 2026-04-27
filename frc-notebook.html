@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRC Engineering Notebook</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0C0F; --panel: #111418; --panel2: #171B20; --border: #1E2530; --border2: #252D38;
+    --text: #D8E4F0; --muted: #4A5A6A; --muted2: #6A7A8A;
+    --primary: #00A8FF; --primary-dim: rgba(0,168,255,0.1); --primary-mid: rgba(0,168,255,0.25);
+    --yellow: #FFB800; --yellow-dim: rgba(255,184,0,0.1);
+    --green: #00C97A; --green-dim: rgba(0,201,122,0.1);
+    --red: #FF4D4D; --red-dim: rgba(255,77,77,0.1);
+    --orange: #FF7A2F; --orange-dim: rgba(255,122,47,0.1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,168,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,168,255,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
+  .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+  .sidebar { width: 230px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; }
+  .sidebar-header { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--primary-dim) 0%, transparent 100%); }
+  .team-badge { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 0.2em; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .team-badge::before { content: ''; width: 20px; height: 1px; background: var(--primary); }
+  .sidebar-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.05em; color: var(--text); line-height: 1.1; }
+  .sidebar-sub { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted2); margin-top: 6px; }
+  .nav-section { font-family: 'Share Tech Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); padding: 16px 20px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; color: var(--muted2); cursor: pointer; transition: all 0.15s; text-decoration: none; border-left: 2px solid transparent; }
+  .nav-item:hover { color: var(--text); background: var(--panel2); }
+  .nav-item.active { color: var(--primary); background: var(--primary-dim); border-left-color: var(--primary); }
+  .nav-icon { font-size: 14px; width: 16px; text-align: center; }
+  .nav-badge { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 9px; background: var(--primary-dim); color: var(--primary); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--primary-mid); }
+  .main { flex: 1; padding: 32px 44px; overflow-y: auto; }
+  .page-header { margin-bottom: 32px; }
+  .breadcrumb { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .breadcrumb span { color: var(--primary); }
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 0.05em; color: var(--text); line-height: 1; }
+  .page-title em { color: var(--primary); font-style: normal; }
+  .header-meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .meta-item { display: flex; align-items: center; gap: 6px; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted2); }
+  .meta-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .season-bar { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; gap: 20px; margin-bottom: 28px; }
+  .season-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+  .season-track { flex: 1; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; position: relative; }
+  .season-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), var(--green)); position: relative; }
+  .season-fill::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .season-phases { display: flex; gap: 12px; }
+  .phase-chip { font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 3px; border: 1px solid var(--border2); color: var(--muted); white-space: nowrap; }
+  .phase-chip.done { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .phase-chip.active { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .stat-card.blue::before { background: var(--primary); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.orange::before { background: var(--orange); }
+  .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 0.02em; line-height: 1; }
+  .stat-card.blue .stat-value { color: var(--primary); }
+  .stat-card.yellow .stat-value { color: var(--yellow); }
+  .stat-card.green .stat-value { color: var(--green); }
+  .stat-card.orange .stat-value { color: var(--orange); }
+  .stat-sub { font-size: 11px; color: var(--muted2); margin-top: 5px; }
+  .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .section-head h2 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.08em; color: var(--text); }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .section-tag { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .log-section { margin-bottom: 32px; }
+  .log-entry { display: grid; grid-template-columns: 80px 1fr; gap: 0; position: relative; margin-bottom: 4px; }
+  .log-entry:not(:last-child) .log-line { position: absolute; left: 40px; top: 36px; bottom: -4px; width: 1px; background: var(--border); }
+  .log-date-col { display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 6px; }
+  .log-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--primary); background: var(--bg); flex-shrink: 0; position: relative; z-index: 1; }
+  .log-dot.yellow { border-color: var(--yellow); }
+  .log-dot.green { border-color: var(--green); }
+  .log-dot.orange { border-color: var(--orange); }
+  .log-date-text { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); text-align: center; line-height: 1.3; }
+  .log-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-left: 12px; margin-bottom: 4px; transition: border-color 0.2s, transform 0.2s; }
+  .log-card:hover { border-color: var(--border2); transform: translateX(3px); }
+  .log-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 12px; }
+  .log-card-title { font-weight: 600; font-size: 14px; color: var(--text); line-height: 1.3; }
+  .log-type-badge { font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+  .badge-mechanical { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,122,47,0.3); }
+  .badge-software { background: var(--primary-dim); color: var(--primary); border: 1px solid var(--primary-mid); }
+  .badge-strategy { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(255,184,0,0.3); }
+  .log-card-body { font-size: 13px; color: var(--muted2); line-height: 1.6; margin-bottom: 10px; }
+  .log-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .log-tag { font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 3px; background: var(--panel2); color: var(--muted); border: 1px solid var(--border2); }
+  .log-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .log-author { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .author-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--primary-dim); border: 1px solid var(--primary-mid); display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--primary); }
+  .log-link { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 4px; opacity: 0.7; transition: opacity 0.15s; }
+  .log-link:hover { opacity: 1; }
+  .subsystem-section { margin-bottom: 32px; }
+  .subsystem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .subsystem-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; transition: all 0.2s; cursor: pointer; }
+  .subsystem-card:hover { border-color: var(--primary); background: var(--panel2); }
+  .sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .sub-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.05em; color: var(--text); }
+  .sub-status { font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 3px 7px; border-radius: 3px; }
+  .sub-status.in-progress { background: var(--primary-dim); color: var(--primary); border: 1px solid var(--primary-mid); }
+  .sub-status.done { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,201,122,0.3); }
+  .sub-status.testing { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(255,184,0,0.3); }
+  .sub-desc { font-size: 12px; color: var(--muted2); line-height: 1.5; margin-bottom: 12px; }
+  .sub-bar { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+  .sub-fill { height: 100%; border-radius: 2px; }
+  .sub-percent { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); text-align: right; }
+  .sub-owner { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 8px; }
+  .match-section { margin-bottom: 32px; }
+  .match-table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-size: 13px; }
+  .match-table th { background: var(--panel2); font-family: 'Share Tech Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 10px 14px; text-align: left; font-weight: 400; }
+  .match-table td { padding: 12px 14px; border-top: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+  .match-table tr:hover td { background: var(--panel2); }
+  .result-pill { font-family: 'Share Tech Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 3px; }
+  .result-win { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,201,122,0.3); }
+  .result-loss { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,77,0.3); }
+  .result-upcoming { background: var(--primary-dim); color: var(--primary); border: 1px solid var(--primary-mid); }
+  .score-display { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted2); }
+  .add-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: var(--primary-dim); color: var(--primary); border: 1px solid var(--primary-mid); border-radius: 5px; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+  .add-btn:hover { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .notion-guide { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 8px; padding: 20px 22px; margin-bottom: 28px; }
+  .notion-guide h3 { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .guide-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .guide-col-title { font-family: 'Share Tech Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--yellow); margin-bottom: 10px; }
+  .guide-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .guide-list li { font-size: 12px; color: var(--muted2); line-height: 1.5; padding-left: 14px; position: relative; }
+  .guide-list li::before { content: '›'; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
+  .pages-section { margin-bottom: 32px; }
+  .pages-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .page-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 8px; }
+  .page-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .page-icon { font-size: 20px; }
+  .page-name { font-weight: 600; font-size: 13px; color: var(--text); line-height: 1.3; }
+  .page-count { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); margin-top: auto; }
+  .page-bar { height: 2px; background: var(--border2); border-radius: 1px; overflow: hidden; }
+  .page-fill { height: 100%; border-radius: 1px; background: var(--primary); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="team-badge">FRC TEAM #XXXX</div>
+      <div class="sidebar-title">Engineering<br>Notebook</div>
+      <div class="sidebar-sub">2025–2026 Season · REEFSCAPE℠</div>
+    </div>
+    <div class="nav-section">// Overview</div>
+    <a class="nav-item active" href="#"><span class="nav-icon">⚡</span>Dashboard</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📋</span>Season Timeline</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🏆</span>Competition Log <span class="nav-badge">World</span></a>
+    <div class="nav-section">// Engineering</div>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙️</span>Mechanical</a>
+    <a class="nav-item" href="#"><span class="nav-icon">💻</span>Software</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚡</span>Electrical</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🎮</span>Drive Strategy</a>
+    <div class="nav-section">// Design</div>
+    <a class="nav-item" href="#"><span class="nav-icon">📐</span>CAD / Drawings</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🧪</span>Test Results</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔁</span>Iteration Log</a>
+    <div class="nav-section">// My Role</div>
+    <a class="nav-item" href="#"><span class="nav-icon">👤</span>My Contributions</a>
+    <a class="nav-item" href="#"><span class="nav-icon">💡</span>Ideas & Proposals</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📝</span>Reflections</a>
+    <div class="nav-section">// Resources</div>
+    <a class="nav-item" href="#"><span class="nav-icon">📎</span>Documentation</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔗</span>GitHub / Code</a>
+  </nav>
+  <main class="main">
+    <div class="page-header">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div class="breadcrumb">NOTEBOOK <span>/</span> DASHBOARD</div>
+          <div class="page-title"><em>FRC</em> Engineering<br>Notebook</div>
+          <div class="header-meta">
+            <div class="meta-item"><span class="dot"></span> Season Active</div>
+            <div class="meta-item">// REEFSCAPE℠ 2025–2026</div>
+            <div class="meta-item">// Last updated: Apr 26, 2026</div>
+          </div>
+        </div>
+        <button class="add-btn">+ New Entry</button>
+      </div>
+    </div>
+    <div class="season-bar">
+      <div class="season-label">Season Progress</div>
+      <div class="season-track"><div class="season-fill" style="width:78%"></div></div>
+      <div class="season-phases">
+        <span class="phase-chip done">✓ Kickoff</span>
+        <span class="phase-chip done">✓ Build</span>
+        <span class="phase-chip done">✓ Regionals</span>
+        <span class="phase-chip active">▶ Worlds</span>
+        <span class="phase-chip">Off-season</span>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="stat-label">// Notebook Entries</div><div class="stat-value">47</div><div class="stat-sub">Since Jan 4 kickoff</div></div>
+      <div class="stat-card yellow"><div class="stat-label">// My Contributions</div><div class="stat-value">23</div><div class="stat-sub">Entries authored</div></div>
+      <div class="stat-card green"><div class="stat-label">// Matches Won</div><div class="stat-value">14</div><div class="stat-sub">of 19 played</div></div>
+      <div class="stat-card orange"><div class="stat-label">// Design Iterations</div><div class="stat-value">8</div><div class="stat-sub">Across 3 subsystems</div></div>
+    </div>
+    <div class="notion-guide">
+      <h3>📋 How to build this in Notion</h3>
+      <div class="guide-cols">
+        <div>
+          <div class="guide-col-title">Database Structure</div>
+          <ul class="guide-list">
+            <li>Main DB: <strong>Engineering Log</strong> — Date, Type, Subsystem, Author, Status</li>
+            <li>Linked DB: <strong>Match Log</strong> — Match #, Event, Result, Score, Notes</li>
+            <li>Linked DB: <strong>Subsystems</strong> — Name, Owner, Progress, Status</li>
+            <li>Use <strong>Relations</strong> to connect entries → subsystems</li>
+          </ul>
+        </div>
+        <div>
+          <div class="guide-col-title">Recommended Views</div>
+          <ul class="guide-list">
+            <li>Dashboard: <strong>Gallery view</strong> of entries, sorted by date</li>
+            <li>Per-subsystem: <strong>Filtered board</strong> by Subsystem property</li>
+            <li>Timeline: <strong>Timeline view</strong> for build season calendar</li>
+            <li>My work: Filter by Author = your name</li>
+          </ul>
+        </div>
+        <div>
+          <div class="guide-col-title">Each Entry Should Include</div>
+          <ul class="guide-list">
+            <li><strong>Goal</strong>: What were you trying to solve?</li>
+            <li><strong>Process</strong>: What did you actually do?</li>
+            <li><strong>Result</strong>: Did it work? Data/measurements?</li>
+            <li><strong>Next Steps</strong>: What comes next?</li>
+            <li><strong>Images</strong>: Photos, CAD screenshots, graphs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="log-section">
+      <div class="section-head">
+        <h2>Recent Entries</h2>
+        <div class="section-line"></div>
+        <div class="section-tag">Chronological Log</div>
+        <button class="add-btn">+ Add Entry</button>
+      </div>
+      <div class="log-entry">
+        <div class="log-line"></div>
+        <div class="log-date-col"><div class="log-dot"></div><div class="log-date-text">APR<br>22</div></div>
+        <div class="log-card">
+          <div class="log-card-header"><div class="log-card-title">Autonomous path optimization — coral intake alignment fix</div><span class="log-type-badge badge-software">Software</span></div>
+          <div class="log-card-body">Identified consistent 3cm offset in autonomous coral pickup. Adjusted PathPlanner waypoint coordinates and re-ran 12 test cycles. Success rate improved from 67% → 91%.</div>
+          <div class="log-tags"><span class="log-tag">Autonomous</span><span class="log-tag">PathPlanner</span><span class="log-tag">Coral Intake</span></div>
+          <div class="log-footer"><div class="log-author"><div class="author-dot">AJ</div>Alex J. · Software Lead</div><a class="log-link" href="#">View Code Commit →</a></div>
+        </div>
+      </div>
+      <div class="log-entry">
+        <div class="log-line"></div>
+        <div class="log-date-col"><div class="log-dot orange"></div><div class="log-date-text">APR<br>18</div></div>
+        <div class="log-card">
+          <div class="log-card-header"><div class="log-card-title">Elevator gearbox — bearing replacement after Regionals wear</div><span class="log-type-badge badge-mechanical">Mechanical</span></div>
+          <div class="log-card-body">Post-regional inspection revealed worn bearings in elevator gearbox. Replaced with SKF 6004-2Z bearings. Re-tested with full coral payload — deflection back within spec.</div>
+          <div class="log-tags"><span class="log-tag">Elevator</span><span class="log-tag">Maintenance</span><span class="log-tag">Post-Regional</span></div>
+          <div class="log-footer"><div class="log-author"><div class="author-dot" style="background:var(--orange-dim);border-color:rgba(255,122,47,0.3);color:var(--orange)">MK</div><span style="color:var(--muted)">Mike K. · Mechanical</span></div><a class="log-link" href="#">View CAD Notes →</a></div>
+        </div>
+      </div>
+      <div class="log-entry">
+        <div class="log-date-col"><div class="log-dot yellow"></div><div class="log-date-text">APR<br>14</div></div>
+        <div class="log-card">
+          <div class="log-card-header"><div class="log-card-title">World Championship scouting strategy — Field analysis notes</div><span class="log-type-badge badge-strategy">Strategy</span></div>
+          <div class="log-card-body">Reviewed 2024 World Championship match footage. Top alliances average 3.2 coral pieces per auto cycle. Drafted pick list framework for alliance selection.</div>
+          <div class="log-tags"><span class="log-tag">Scouting</span><span class="log-tag">Alliance Selection</span><span class="log-tag">World Champs</span></div>
+          <div class="log-footer"><div class="log-author"><div class="author-dot" style="background:var(--yellow-dim);border-color:rgba(255,184,0,0.3);color:var(--yellow)">AJ</div><span style="color:var(--muted)">Alex J. · Strategy</span></div><a class="log-link" href="#">View Scouting Sheet →</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="subsystem-section">
+      <div class="section-head"><h2>Subsystems</h2><div class="section-line"></div><div class="section-tag">Robot Architecture</div></div>
+      <div class="subsystem-grid">
+        <div class="subsystem-card"><div class="sub-header"><div class="sub-name">Drivetrain</div><span class="sub-status done">✓ Done</span></div><div class="sub-desc">Swerve drive, MK4i modules, Kraken X60 motors.</div><div class="sub-bar"><div class="sub-fill" style="width:100%;background:var(--green)"></div></div><div class="sub-percent" style="color:var(--green)">100%</div><div class="sub-owner">👤 Drive subteam · 12 entries</div></div>
+        <div class="subsystem-card"><div class="sub-header"><div class="sub-name">Coral Intake</div><span class="sub-status testing">Testing</span></div><div class="sub-desc">Roller intake + funnel design. Tuning grip force.</div><div class="sub-bar"><div class="sub-fill" style="width:80%;background:var(--yellow)"></div></div><div class="sub-percent" style="color:var(--yellow)">80%</div><div class="sub-owner">👤 Manipulator · 9 entries</div></div>
+        <div class="subsystem-card"><div class="sub-header"><div class="sub-name">Elevator</div><span class="sub-status done">✓ Done</span></div><div class="sub-desc">2-stage cascade elevator, 3 scoring positions.</div><div class="sub-bar"><div class="sub-fill" style="width:100%;background:var(--green)"></div></div><div class="sub-percent" style="color:var(--green)">100%</div><div class="sub-owner">👤 Mechanical · 8 entries</div></div>
+        <div class="subsystem-card"><div class="sub-header"><div class="sub-name">Autonomous</div><span class="sub-status in-progress">In Progress</span></div><div class="sub-desc">PathPlanner routines for 3-piece auto.</div><div class="sub-bar"><div class="sub-fill" style="width:75%;background:var(--primary)"></div></div><div class="sub-percent">75%</div><div class="sub-owner">👤 Software · 11 entries</div></div>
+        <div class="subsystem-card"><div class="sub-header"><div class="sub-name">Vision</div><span class="sub-status in-progress">In Progress</span></div><div class="sub-desc">Limelight 3G for AprilTag tracking.</div><div class="sub-bar"><div class="sub-fill" style="width:60%;background:var(--primary)"></div></div><div class="sub-percent">60%</div><div class="sub-owner">👤 Software · 7 entries</div></div>
+        <div class="subsystem-card"><div class="sub-header"><div class="sub-name">Endgame / Climb</div><span class="sub-status done">✓ Done</span></div><div class="sub-desc">Deep cage hang mechanism. Consistent in 3.2s.</div><div class="sub-bar"><div class="sub-fill" style="width:100%;background:var(--green)"></div></div><div class="sub-percent" style="color:var(--green)">100%</div><div class="sub-owner">👤 Mechanical · 6 entries</div></div>
+      </div>
+    </div>
+    <div class="match-section">
+      <div class="section-head"><h2>Match Log</h2><div class="section-line"></div><div class="section-tag">Competition Record</div><button class="add-btn">+ Log Match</button></div>
+      <table class="match-table">
+        <thead><tr><th>Event</th><th>Match</th><th>Result</th><th>Score</th><th>Alliance</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--primary);font-family:'Share Tech Mono',monospace;font-size:11px">World Champs</td><td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted2)">QM-12</td><td><span class="result-pill result-upcoming">Upcoming</span></td><td class="score-display">—</td><td style="font-size:12px;color:var(--muted2)">TBD</td><td style="font-size:12px;color:var(--muted2)">World Championship, Houston TX</td></tr>
+          <tr><td style="color:var(--muted2);font-family:'Share Tech Mono',monospace;font-size:11px">Regionals</td><td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted2)">F-1</td><td><span class="result-pill result-win">WIN</span></td><td class="score-display">142 – 98</td><td style="font-size:12px;color:var(--muted2)">4512, 1678</td><td style="font-size:12px;color:var(--muted2)">Regional Champions 🏆</td></tr>
+          <tr><td style="color:var(--muted2);font-family:'Share Tech Mono',monospace;font-size:11px">Regionals</td><td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted2)">SF-2</td><td><span class="result-pill result-win">WIN</span></td><td class="score-display">128 – 74</td><td style="font-size:12px;color:var(--muted2)">4512, 1678</td><td style="font-size:12px;color:var(--muted2)">Solid auto performance</td></tr>
+          <tr><td style="color:var(--muted2);font-family:'Share Tech Mono',monospace;font-size:11px">Regionals</td><td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted2)">QM-08</td><td><span class="result-pill result-loss">LOSS</span></td><td class="score-display">87 – 103</td><td style="font-size:12px;color:var(--muted2)">2910, 971</td><td style="font-size:12px;color:var(--muted2)">Intake jam in teleop Q3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pages-section">
+      <div class="section-head"><h2>Notebook Sections</h2><div class="section-line"></div><div class="section-tag">All Pages</div></div>
+      <div class="pages-grid">
+        <div class="page-card"><div class="page-icon">⚙️</div><div class="page-name">Mechanical Design</div><div class="page-bar"><div class="page-fill" style="width:85%;background:var(--orange)"></div></div><div class="page-count">14 entries</div></div>
+        <div class="page-card"><div class="page-icon">💻</div><div class="page-name">Software & Code</div><div class="page-bar"><div class="page-fill" style="width:70%"></div></div><div class="page-count">11 entries</div></div>
+        <div class="page-card"><div class="page-icon">🧪</div><div class="page-name">Test Results</div><div class="page-bar"><div class="page-fill" style="width:55%;background:var(--green)"></div></div><div class="page-count">8 entries</div></div>
+        <div class="page-card"><div class="page-icon">🎮</div><div class="page-name">Drive Strategy</div><div class="page-bar"><div class="page-fill" style="width:40%;background:var(--yellow)"></div></div><div class="page-count">6 entries</div></div>
+        <div class="page-card"><div class="page-icon">📐</div><div class="page-name">CAD & Drawings</div><div class="page-bar"><div class="page-fill" style="width:90%;background:var(--orange)"></div></div><div class="page-count">5 entries</div></div>
+        <div class="page-card"><div class="page-icon">👤</div><div class="page-name">My Contributions</div><div class="page-bar"><div class="page-fill" style="width:60%"></div></div><div class="page-count">23 entries</div></div>
+        <div class="page-card"><div class="page-icon">🔁</div><div class="page-name">Iteration Log</div><div class="page-bar"><div class="page-fill" style="width:45%;background:#B450FF"></div></div><div class="page-count">8 iterations</div></div>
+        <div class="page-card"><div class="page-icon">💡</div><div class="page-name">Ideas & Reflections</div><div class="page-bar"><div class="page-fill" style="width:30%;background:var(--green)"></div></div><div class="page-count">4 entries</div></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

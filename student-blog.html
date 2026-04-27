@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Blog Template</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F4EF;
+    --ink: #1A1612;
+    --muted: #7A7068;
+    --accent: #C4773B;
+    --accent-soft: #F0E6D8;
+    --green: #4A7C59;
+    --green-soft: #E0EDE5;
+    --blue: #3A5F8A;
+    --blue-soft: #E0EAF4;
+    --border: #E2DDD6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--ink); font-family: 'Instrument Sans', sans-serif; min-height: 100vh; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; background: #EFEBE4; border-right: 1px solid var(--border); padding: 32px 20px; display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); line-height: 1.3; }
+  .sidebar-logo span { display: block; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .nav-section { margin-top: 8px; margin-bottom: 4px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 8px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; font-size: 14px; color: var(--ink); cursor: pointer; transition: background 0.15s; text-decoration: none; }
+  .nav-item:hover, .nav-item.active { background: var(--accent-soft); color: var(--accent); }
+  .nav-item .icon { font-size: 15px; opacity: 0.8; }
+  .main { flex: 1; padding: 48px 60px; max-width: 860px; }
+  .hero { margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border); animation: fadeUp 0.6s ease both; }
+  .hero-tag { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 12px; }
+  .hero h1 { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 600; line-height: 1.1; color: var(--ink); margin-bottom: 16px; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+  .meta-chip { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .meta-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; animation: fadeUp 0.6s 0.1s ease both; }
+  .stat-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,22,18,0.08); }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; color: var(--ink); line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--ink); }
+  .section-badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); }
+  .blog-grid { display: grid; gap: 16px; margin-bottom: 48px; animation: fadeUp 0.6s 0.2s ease both; }
+  .blog-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .blog-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; transition: background 0.2s; }
+  .blog-card:hover { box-shadow: 0 6px 20px rgba(26,22,18,0.07); transform: translateY(-1px); }
+  .blog-card:hover::before { background: var(--accent); }
+  .blog-card.type-academic::before { background: var(--blue); }
+  .blog-card.type-activity::before { background: var(--green); }
+  .blog-card.type-essay::before { background: var(--accent); }
+  .blog-tag { display: inline-flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }
+  .tag-academic { background: var(--blue-soft); color: var(--blue); }
+  .tag-activity { background: var(--green-soft); color: var(--green); }
+  .tag-essay { background: var(--accent-soft); color: var(--accent); }
+  .blog-card h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 8px; line-height: 1.3; }
+  .blog-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .blog-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; margin-top: 4px; }
+  .blog-status { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 10px; margin-top: 12px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .goals-section { margin-bottom: 48px; animation: fadeUp 0.6s 0.3s ease both; }
+  .goals-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .goals-table th { background: #EFEBE4; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 12px 16px; text-align: left; font-weight: 500; }
+  .goals-table td { padding: 14px 16px; font-size: 14px; color: var(--ink); border-top: 1px solid var(--border); vertical-align: middle; }
+  .goals-table tr:hover td { background: var(--cream); }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; width: 120px; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.blue { background: var(--blue); }
+  .reflection-box { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 48px; animation: fadeUp 0.6s 0.4s ease both; }
+  .reflection-prompt { font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+  .reflection-input { width: 100%; background: var(--cream); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-family: 'Instrument Sans', sans-serif; font-size: 14px; color: var(--ink); resize: vertical; min-height: 80px; outline: none; transition: border-color 0.2s; }
+  .reflection-input:focus { border-color: var(--accent); }
+  .reflection-input::placeholder { color: var(--muted); }
+  .notion-guide { background: var(--accent-soft); border: 1px solid #E8C9A8; border-radius: 12px; padding: 24px; margin-bottom: 32px; animation: fadeUp 0.6s 0.5s ease both; }
+  .notion-guide h4 { font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 12px; color: var(--ink); }
+  .guide-steps { display: flex; flex-direction: column; gap: 8px; }
+  .guide-step { display: flex; gap: 12px; align-items: flex-start; font-size: 13px; color: var(--ink); line-height: 1.5; }
+  .step-num { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--accent); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--ink); color: white; border: none; border-radius: 8px; font-family: 'Instrument Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+  .add-btn:hover { background: var(--accent); }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #EFEBE4; padding: 4px; border-radius: 8px; width: fit-content; }
+  .tab { padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.15s; color: var(--muted); border: none; background: transparent; font-family: 'Instrument Sans', sans-serif; }
+  .tab.active { background: white; color: var(--ink); font-weight: 500; box-shadow: 0 1px 4px rgba(26,22,18,0.08); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-logo">Alex Johnson<span>Class of 2026 · Phillips Exeter</span></div>
+    <div class="nav-section">Blog</div>
+    <a class="nav-item active" href="#"><span class="icon">🏠</span> Home</a>
+    <a class="nav-item" href="#"><span class="icon">📚</span> Academic Posts</a>
+    <a class="nav-item" href="#"><span class="icon">🏆</span> Activities & Leadership</a>
+    <a class="nav-item" href="#"><span class="icon">✍️</span> Essays & Reflections</a>
+    <div class="nav-section" style="margin-top:16px">Planning</div>
+    <a class="nav-item" href="#"><span class="icon">🎯</span> Goals Tracker</a>
+    <a class="nav-item" href="#"><span class="icon">📅</span> Post Calendar</a>
+    <a class="nav-item" href="#"><span class="icon">💡</span> Ideas Bank</a>
+    <div class="nav-section" style="margin-top:16px">Profile</div>
+    <a class="nav-item" href="#"><span class="icon">🎓</span> About Me</a>
+    <a class="nav-item" href="#"><span class="icon">📎</span> Resume / CV</a>
+  </nav>
+  <main class="main">
+    <div class="hero">
+      <div class="hero-tag">Student Blog · Spring 2025</div>
+      <h1>Alex's<br>Journey</h1>
+      <div class="hero-meta">
+        <div class="meta-chip"><span class="dot"></span> Phillips Exeter Academy</div>
+        <div class="meta-chip"><span class="dot" style="background:var(--blue)"></span> Grade 11</div>
+        <div class="meta-chip"><span class="dot" style="background:var(--green)"></span> Last updated Apr 20</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total Posts</div><div class="stat-value">12</div><div class="stat-sub">3 drafts in progress</div></div>
+      <div class="stat-card"><div class="stat-label">Topics Covered</div><div class="stat-value">4</div><div class="stat-sub">Academic · EC · Essay · Career</div></div>
+      <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value">3</div><div class="stat-sub">Posts published</div></div>
+    </div>
+    <div class="notion-guide">
+      <h4>📋 How to use this as a Notion template</h4>
+      <div class="guide-steps">
+        <div class="guide-step"><div class="step-num">1</div><div>Create a new Notion page titled <strong>"My Blog"</strong>. Add an icon (🎓) and cover image.</div></div>
+        <div class="guide-step"><div class="step-num">2</div><div>Add a <strong>Database (Full page)</strong> for blog posts. Add properties: Title, Category (Select), Status (Select: Draft / Published), Date, Tags (Multi-select).</div></div>
+        <div class="guide-step"><div class="step-num">3</div><div>Create 3 <strong>filtered views</strong> — "Academic", "Activities", "Essays" — filtering by Category property.</div></div>
+        <div class="guide-step"><div class="step-num">4</div><div>Add a <strong>Gallery view</strong> as your homepage display. Each card becomes a visual blog post preview.</div></div>
+        <div class="guide-step"><div class="step-num">5</div><div>Inside each entry, use the <strong>post template below</strong> with H1 title, tags, body text, and a "Reflection" toggle block at the bottom.</div></div>
+      </div>
+    </div>
+    <div style="margin-bottom: 48px;">
+      <div class="section-header">
+        <div class="section-title">Recent Posts</div>
+        <button class="add-btn">+ New Post</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active">All</button>
+        <button class="tab">Academic</button>
+        <button class="tab">Activities</button>
+        <button class="tab">Essays</button>
+      </div>
+      <div class="blog-grid">
+        <div class="blog-card type-academic">
+          <div>
+            <div class="blog-tag tag-academic">📚 Academic</div>
+            <h3>What My History Research Taught Me About Primary Sources</h3>
+            <p>Digging through 19th century census data for my History 400 research paper changed how I think about objectivity and perspective...</p>
+            <div class="blog-status"><span class="status-dot" style="background:var(--green)"></span><span style="color:var(--green)">Published</span></div>
+          </div>
+          <div class="blog-date">Apr 18</div>
+        </div>
+        <div class="blog-card type-activity">
+          <div>
+            <div class="blog-tag tag-activity">🏆 Leadership</div>
+            <h3>Running the Model UN Conference: What I Learned About Delegation</h3>
+            <p>As Secretary-General this year, I had to make decisions that affected 200+ delegates. Here's what surprised me most...</p>
+            <div class="blog-status"><span class="status-dot" style="background:var(--green)"></span><span style="color:var(--green)">Published</span></div>
+          </div>
+          <div class="blog-date">Apr 12</div>
+        </div>
+        <div class="blog-card type-essay">
+          <div>
+            <div class="blog-tag tag-essay">✍️ Reflection</div>
+            <h3>On Failure: The Science Fair That Didn't Go as Planned</h3>
+            <p>My experiment failed spectacularly. But writing this reflection made me realize failure was the most important part...</p>
+            <div class="blog-status"><span class="status-dot" style="background:#C4A93B"></span><span style="color:#8A6F1A">Draft</span></div>
+          </div>
+          <div class="blog-date">Apr 5</div>
+        </div>
+      </div>
+    </div>
+    <div class="goals-section">
+      <div class="section-header">
+        <div class="section-title">Blogging Goals</div>
+        <span class="section-badge">Spring Term</span>
+      </div>
+      <table class="goals-table">
+        <thead><tr><th>Goal</th><th>Category</th><th>Progress</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Write 2 academic research posts</td>
+            <td><span class="blog-tag tag-academic" style="margin:0">Academic</span></td>
+            <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar"><div class="progress-fill blue" style="width:50%"></div></div><span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">1 / 2</span></div></td>
+            <td style="color:var(--muted);font-size:13px">May 15</td>
+          </tr>
+          <tr>
+            <td>Document all leadership roles</td>
+            <td><span class="blog-tag tag-activity" style="margin:0">Activities</span></td>
+            <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar"><div class="progress-fill green" style="width:75%"></div></div><span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">3 / 4</span></div></td>
+            <td style="color:var(--muted);font-size:13px">May 30</td>
+          </tr>
+          <tr>
+            <td>Draft Common App personal essay</td>
+            <td><span class="blog-tag tag-essay" style="margin:0">Essay</span></td>
+            <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div><span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">1 / 5 drafts</span></div></td>
+            <td style="color:var(--muted);font-size:13px">Aug 1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="reflection-box">
+      <div class="section-title" style="margin-bottom:12px">Weekly Reflection</div>
+      <div class="reflection-prompt">"What did I learn this week that I want to remember in 5 years?"</div>
+      <textarea class="reflection-input" placeholder="Write your reflection here... (This stays private unless you choose to publish it)"></textarea>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="add-btn" style="font-size:12px;padding:8px 14px">Save Reflection</button>
+        <button style="font-size:12px;padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'Instrument Sans',sans-serif;color:var(--muted)">Turn into Post →</button>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
